@@ -19,7 +19,7 @@ niid:
 - 非獨立同分布: noniid
 
 balance:
-- non-IID: False / \-
+- non-IID: False
 - iid: balance
 
 partition 分布方式:
@@ -30,6 +30,51 @@ partition 分布方式:
 ```python
 python main.py -data Cifar10_alpha01_100 -nc 100 -jr 0.5 -algo FedUCBN -sca UCB -gr 499 -pr 0.4 -nb 10
 ```
+
+\-data 選擇欲執行的資料集:
+- MNIST: mnist_alpha01_100、mnist_alpha05_100
+- FASHION-MNIST: fmnist_alpha01_100、fmnist_alpha05_100
+- CIFAR10: Cifar10_alpha01_100、Cifar10_alpha05_100、Cifar10_alpha10_100
+- CIFAR100: Cifar100_alpha01_100、Cifar100_alpha05_100
+
+\-nc 客戶端總數
+
+\-jr 每回合參與訓練比例
+
+\-algo Server聚合演算法
+- FedUCBN
+- FedAvg
+
+\-sca 客戶端選擇演算法
+- Random
+- UCB
+- UCB_cs (預設 reward 為 accuracy，reward 調整為 loss 需調整 myserver.py 和 serverbase.py)
+
+\-gr 訓練總回合數
+
+\-pr 中毒率，0.0 為無攻擊，0.4 為 40% 中毒率
+
+\-nb 資料集總類別數
+
+\-lr 本地模型學習率，預設 0.005
+
+\-ls 本地訓練回合數 (local epoch)
+
+\-lbs 本地 batch size
+
+### 3.模型
+目前使用 code/system/flcore/trainmodel/models.py 的 FedAvgCNN 類別
+
+### 4.客戶端選擇策略
+在 code/system/flcore/servers/client_selection/ 內新增修改
+- Random
+- UCB
+- UCB_cs
+
+### 5.Server聚合演算法
+在 code/system/flcore/servers/ 內新增修改，基於 serverbase.py 進行修改
+
+如要修改最後檔案儲存的位置需要在 serverbase.py 調整
 
 
 ****
