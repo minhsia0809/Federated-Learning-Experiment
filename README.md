@@ -1,3 +1,20 @@
+## 夏旻版本
+### 1.產生資料集指令
+```python
+python generate_file noniid - dir 
+```
+generate_file: 根據要產生的資料集的檔案
+- generate_mnist.py -> 產生 MNIST
+- generate_fnist.py -> 產生 FASHION-MNIST
+- generate_cifar10.py -> 產生 CIFAR10
+- generate_cifar100.py -> 產生 CIFAR100
+
+參數修改:
+- 如要修改 client 數，需要修改 generate_file 內的 num_clients
+- 如要修改切割好的資料集檔案名稱，需要修改 generate_file 內的 dir_path
+- 如要修改非獨立同分布的 alpha 值，需修改 utils/dataset_utils.py 內的 alpha
+
+
 
 ****
 ## 棨翔版本
