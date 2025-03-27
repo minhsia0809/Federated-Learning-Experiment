@@ -9,11 +9,27 @@ generate_file: 根據要產生的資料集的檔案
 - generate_cifar10.py -> 產生 CIFAR10
 - generate_cifar100.py -> 產生 CIFAR100
 
-參數修改:
+generate_file 參數修改:
 - 如要修改 client 數，需要修改 generate_file 內的 num_clients
 - 如要修改切割好的資料集檔案名稱，需要修改 generate_file 內的 dir_path
 - 如要修改非獨立同分布的 alpha 值，需修改 utils/dataset_utils.py 內的 alpha
 
+niid: 
+- 獨立同分布: False
+- 非獨立同分布: noniid
+
+balance:
+- non-IID: False / \-
+- iid: balance
+
+partition 分布方式:
+- Dirichlet distribution: dir
+- pat
+
+### 2.執行主程式
+```python
+python main.py -data Cifar10_alpha01_100 -nc 100 -jr 0.5 -algo FedUCBN -sca UCB -gr 499 -pr 0.4 -nb 10
+```
 
 
 ****
