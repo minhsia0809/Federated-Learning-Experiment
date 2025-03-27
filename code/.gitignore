@@ -1,0 +1,6 @@
+*.h5
+/results/model test
+/results/Cifar100_*_*_*
+/results/*/
+/system/mlruns/*
+/results/*.png
