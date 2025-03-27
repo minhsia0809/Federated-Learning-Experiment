@@ -3,4 +3,5 @@
 /results/Cifar100_*_*_*
 /results/*/
 /system/mlruns/*
+/system/models/Cifar100_*_*_*/
 /results/*.png
