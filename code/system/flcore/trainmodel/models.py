@@ -247,6 +247,50 @@ class FedAvgCNN(nn.Module):
         out = self.fc(out)
         return out
 
+class Cifar100CNN(nn.Module):
+    def __init__(self, in_features=1, num_classes=100, dim=1024):
+        super().__init__()
+        self.conv1 = nn.Sequential(
+            nn.Conv2d(in_features,
+                        32,
+                        kernel_size=5,
+                        padding=0,
+                        stride=1,
+                        bias=True),
+            nn.BatchNorm2d(32),
+            nn.ReLU(inplace=True), 
+            nn.MaxPool2d(kernel_size=(3, 3))
+        )
+        self.conv2 = nn.Sequential(
+            nn.Conv2d(32,
+                        64,
+                        kernel_size=5,
+                        padding=0,
+                        stride=1,
+                        bias=True),
+            nn.BatchNorm2d(64),
+            nn.ReLU(inplace=True), 
+            nn.MaxPool2d(kernel_size=(3, 3))
+        )
+        self.fc1 = nn.Sequential(
+            nn.Linear(dim, 512), 
+            nn.ReLU(inplace=True)
+        )
+        self.fc2 = nn.Sequential(
+            nn.Linear(512, 256), 
+            nn.ReLU(inplace=True)
+        )
+        self.fc = nn.Linear(256, num_classes)
+
+    def forward(self, x):
+        out = self.conv1(x)
+        out = self.conv2(out)
+        out = torch.flatten(out, 1)
+        out = self.fc1(out)
+        out = self.fc2(out)
+        out = self.fc(out)
+        return out
+
 # ====================================================================================================================
 
 # https://github.com/katsura-jp/fedavg.pytorch/blob/master/src/models/mlp.py
