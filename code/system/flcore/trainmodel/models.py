@@ -240,6 +240,7 @@ class FedAvgCNN(nn.Module):
         self.fc = nn.Linear(512, num_classes)
 
     def forward(self, x):
+        
         out = self.conv1(x)
         out = self.conv2(out)
         out = torch.flatten(out, 1)
@@ -248,7 +249,7 @@ class FedAvgCNN(nn.Module):
         return out
 
 class Cifar100CNN(nn.Module):
-    def __init__(self, in_features=1, num_classes=100, dim=1024):
+    def __init__(self, in_features=3, num_classes=100, dim=1600): #in_features-> RGB = 3
         super().__init__()
         self.conv1 = nn.Sequential(
             nn.Conv2d(in_features,
@@ -259,7 +260,7 @@ class Cifar100CNN(nn.Module):
                         bias=True),
             nn.BatchNorm2d(32),
             nn.ReLU(inplace=True), 
-            nn.MaxPool2d(kernel_size=(3, 3))
+            nn.MaxPool2d(kernel_size=(2, 2))
         )
         self.conv2 = nn.Sequential(
             nn.Conv2d(32,
@@ -270,24 +271,21 @@ class Cifar100CNN(nn.Module):
                         bias=True),
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True), 
-            nn.MaxPool2d(kernel_size=(3, 3))
+            nn.MaxPool2d(kernel_size=(2, 2))
         )
+        
         self.fc1 = nn.Sequential(
             nn.Linear(dim, 512), 
             nn.ReLU(inplace=True)
         )
-        self.fc2 = nn.Sequential(
-            nn.Linear(512, 256), 
-            nn.ReLU(inplace=True)
-        )
-        self.fc = nn.Linear(256, num_classes)
+
+        self.fc = nn.Linear(512, num_classes)
 
     def forward(self, x):
         out = self.conv1(x)
         out = self.conv2(out)
         out = torch.flatten(out, 1)
         out = self.fc1(out)
-        out = self.fc2(out)
         out = self.fc(out)
         return out
 
