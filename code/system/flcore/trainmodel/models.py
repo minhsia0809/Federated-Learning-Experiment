@@ -275,11 +275,12 @@ class Cifar100CNN(nn.Module):
         )
         
         self.fc1 = nn.Sequential(
-            nn.Linear(dim, 512), 
-            nn.ReLU(inplace=True)
+            nn.Linear(dim, 128), 
+            nn.ReLU(inplace=True), 
+            nn.Dropout(0.5)
         )
 
-        self.fc = nn.Linear(512, num_classes)
+        self.fc = nn.Linear(128, num_classes)
 
     def forward(self, x):
         out = self.conv1(x)
