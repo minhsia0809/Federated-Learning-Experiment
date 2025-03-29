@@ -290,6 +290,123 @@ class Cifar100CNN(nn.Module):
         out = self.fc(out)
         return out
 
+class Cifar100CNN1(nn.Module): #not good
+    def __init__(self, in_features=3, num_classes=100, dim=1600): #in_features-> RGB = 3
+        super().__init__()
+        self.conv1 = nn.Sequential(
+            nn.Conv2d(in_features,
+                        128,
+                        kernel_size=3,
+                        padding=0,
+                        stride=1,
+                        bias=True),
+            nn.BatchNorm2d(128),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(128,
+                        128,
+                        kernel_size=3,
+                        padding=0,
+                        stride=1,
+                        bias=True),
+            nn.BatchNorm2d(128),
+            nn.ReLU(inplace=True), 
+            nn.MaxPool2d(kernel_size=(2, 2))
+        )
+        self.conv2 = nn.Sequential(
+            nn.Conv2d(128,
+                        256,
+                        kernel_size=3,
+                        padding=0,
+                        stride=1,
+                        bias=True),
+            nn.BatchNorm2d(256),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(256,
+                        256,
+                        kernel_size=3,
+                        padding=0,
+                        stride=1,
+                        bias=True),
+            nn.BatchNorm2d(256),
+            nn.ReLU(inplace=True),           
+            nn.MaxPool2d(kernel_size=(2, 2))
+        )
+        
+        self.fc1 = nn.Sequential(
+            nn.Linear(6400, 512), 
+            nn.ReLU(inplace=True), 
+            nn.Dropout(0.2)
+        )
+
+        self.fc = nn.Linear(512, num_classes)
+
+    def forward(self, x):
+        out = self.conv1(x)
+        out = self.conv2(out)
+        out = torch.flatten(out, 1)
+        out = self.fc1(out)
+        out = self.fc(out)
+        return out
+
+
+class Cifar100CNN2(nn.Module):
+    def __init__(self, in_features=3, num_classes=100, dim=1600): #in_features-> RGB = 3
+        super().__init__()
+        self.conv1 = nn.Sequential(
+            nn.Conv2d(in_features,
+                        32,
+                        kernel_size=3,
+                        padding=0,
+                        stride=1,
+                        bias=True),
+            nn.BatchNorm2d(32),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(32,
+                        32,
+                        kernel_size=3,
+                        padding=0,
+                        stride=1,
+                        bias=True),
+            nn.BatchNorm2d(32),
+            nn.ReLU(inplace=True), 
+            nn.MaxPool2d(kernel_size=(2, 2))
+        )
+        self.conv2 = nn.Sequential(
+            nn.Conv2d(32,
+                        64,
+                        kernel_size=3,
+                        padding=0,
+                        stride=1,
+                        bias=True),
+            nn.BatchNorm2d(64),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(64,
+                        64,
+                        kernel_size=3,
+                        padding=0,
+                        stride=1,
+                        bias=True),
+            nn.BatchNorm2d(64),
+            nn.ReLU(inplace=True),           
+            nn.MaxPool2d(kernel_size=(2, 2))
+        )
+        
+        self.fc1 = nn.Sequential(
+            nn.Linear(1600, 512), 
+            nn.ReLU(inplace=True), 
+            nn.Dropout(0.5)
+        )
+
+        self.fc = nn.Linear(512, num_classes)
+
+    def forward(self, x):
+        out = self.conv1(x)
+        out = self.conv2(out)
+        out = torch.flatten(out, 1)
+        out = self.fc1(out)
+        out = self.fc(out)
+        return out
+
 # ====================================================================================================================
 
 # https://github.com/katsura-jp/fedavg.pytorch/blob/master/src/models/mlp.py
