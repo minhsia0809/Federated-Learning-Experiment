@@ -26,6 +26,12 @@ partition 分布方式:
 - Dirichlet distribution: dir
 - pat
 
+自己的筆記：
+- 在 generate_cifar100.py 中，每個 client 至少分配到 20 個類別
+- 每個類別至少有幾筆資料，取決於資料集的分佈和 alpha 值
+- 每個 client 至少有 40 筆資料 (least_samples = batch_size / (1-train_size))
+- training set 和 test set 比例分別是 75% 和 25%，取四捨五入
+
 ### 2.執行主程式
 ```python
 python main.py -data Cifar10_alpha01_100 -nc 100 -jr 0.5 -algo FedUCBN -sca UCB -gr 499 -pr 0.4 -nb 10
