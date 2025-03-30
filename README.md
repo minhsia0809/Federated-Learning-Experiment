@@ -28,7 +28,7 @@ partition 分布方式:
 
 自己的筆記：
 - 在 generate_cifar100.py 中，每個 client 至少分配到 20 個類別
-- 每個類別至少有幾筆資料，取決於資料集的分佈和 alpha 值
+- client 在每個類別至少有幾筆資料，取決於資料集的分佈和 alpha 值，每個類別逐一分配每個 client 擁有某個類別的資料比例
 - 每個 client 至少有 40 筆資料 (least_samples = batch_size / (1-train_size))
 - training set 和 test set 比例分別是 75% 和 25%，取四捨五入
 
