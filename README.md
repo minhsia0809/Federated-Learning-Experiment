@@ -80,6 +80,17 @@ python main.py -data Cifar10_alpha01_100 -nc 100 -jr 0.5 -algo FedUCBN -sca UCB 
 ### 5.Server聚合演算法
 在 code/system/flcore/servers/ 內新增修改，基於 serverbase.py 進行修改
 
+### 6.Attack
+目前採用 label flippling attack
+把標籤 1 換成 9
+
+code/system/flcore/servers/serverbase.py
+在function select_poisoned_client 中，選取哪個 client 是會被汙染的
+
+code/system/flcore/clients/clientbase.py
+在 function load_train_data 中，將惡意 client 的資料的 1 label 換成 9
+
+### 補充
 如要修改最後檔案儲存的位置需要在 serverbase.py 調整
 
 
