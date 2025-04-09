@@ -10,9 +10,9 @@ from utils.dataset_utils import check, separate_data, split_data, save_file
 
 random.seed(1)
 np.random.seed(1)
-num_clients = 200
+num_clients = 500
 num_classes = 10
-dir_path = "Cifar10_alpha01_200/"
+dir_path = "Cifar10_alpha05_500/"
 
 
 # Allocate data to users
