@@ -6,3 +6,4 @@
 /mnist/
 cifar100_AutoAugment_only.py
 generate_cifar100_*
+/svhn*
