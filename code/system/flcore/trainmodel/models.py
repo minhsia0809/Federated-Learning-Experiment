@@ -348,8 +348,8 @@ class Cifar100CNN1(nn.Module): #50%
         out = self.fc(out)
         return out
 
-class Cifar100CNN2(nn.Module):
-    def __init__(self, in_features=3, num_classes=100, dim=1600): #in_features-> RGB = 3
+class Cifar100CNN2(nn.Module): # good 60%
+    def __init__(self, in_features=3, num_classes=100, dim=1600): #in_features-> RGB = 3 32*32*3
         super().__init__()
         self.conv1 = nn.Sequential(
             nn.Conv2d(in_features,
@@ -357,10 +357,10 @@ class Cifar100CNN2(nn.Module):
                         kernel_size=5,
                         padding=0,
                         stride=1,
-                        bias=True),
+                        bias=True), #28*28*64
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=(2, 2))
+            nn.MaxPool2d(kernel_size=(2, 2)) #14*14*64
         )
         self.conv2 = nn.Sequential(
             nn.Conv2d(64,
@@ -368,10 +368,10 @@ class Cifar100CNN2(nn.Module):
                         kernel_size=5,
                         padding=0,
                         stride=1,
-                        bias=True),
+                        bias=True), #10*10*128
             nn.BatchNorm2d(128),
             nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=(2, 2))
+            nn.MaxPool2d(kernel_size=(2, 2)) #5*5*128
         )
         
         self.fc1 = nn.Sequential(
@@ -381,7 +381,9 @@ class Cifar100CNN2(nn.Module):
             nn.Dropout(0.5)
         )
 
-        self.fc = nn.Linear(512, num_classes)
+        self.fc = nn.Sequential(
+            nn.Linear(512, num_classes) ## softmax not good
+        )
 
     def forward(self, x):
         out = self.conv1(x)
@@ -391,7 +393,7 @@ class Cifar100CNN2(nn.Module):
         out = self.fc(out)
         return out
 
-class Cifar100CNN3(nn.Module):
+class Cifar100CNN3(nn.Module): # bad
     def __init__(self, in_features=3, num_classes=100, dim=1600): #in_features-> RGB = 3
         super().__init__()
         self.conv1 = nn.Sequential(
@@ -400,10 +402,11 @@ class Cifar100CNN3(nn.Module):
                         kernel_size=5,
                         padding=0,
                         stride=1,
-                        bias=True),
+                        bias=True), #28*28*64
             nn.BatchNorm2d(64),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=(2, 2))
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=(2, 2)), #14*14*64
+            
         )
         self.conv2 = nn.Sequential(
             nn.Conv2d(64,
@@ -411,38 +414,140 @@ class Cifar100CNN3(nn.Module):
                         kernel_size=5,
                         padding=0,
                         stride=1,
-                        bias=True),
+                        bias=True), #10*10*128
             nn.BatchNorm2d(128),
             nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=(2, 2))
-        )
-        self.conv3 = nn.Sequential(
-            nn.Conv2d(128,
-                        256,
-                        kernel_size=5,
-                        padding=0,
-                        stride=1,
-                        bias=True),
-            nn.BatchNorm2d(256),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=(2, 2))
+            nn.MaxPool2d(kernel_size=(2, 2)) #5*5*128
         )
         
         self.fc1 = nn.Sequential(
             nn.Linear(3200
+                      , 1600), 
+            nn.ReLU(inplace=True),  
+            nn.Dropout(0.5),
+            
+            nn.Linear(1600
                       , 512), 
-            nn.ReLU(inplace=True), 
-            nn.Dropout(0.5)
+            nn.ReLU(inplace=True),  
+            nn.Dropout(0.5),             
         )
 
-        self.fc = nn.Linear(512, num_classes)
+        self.fc = nn.Sequential(
+            nn.Linear(512, num_classes)
+        )
 
     def forward(self, x):
         out = self.conv1(x)
         out = self.conv2(out)
-        out = self.conv3(out)
         out = torch.flatten(out, 1)
         out = self.fc1(out)
+        out = self.fc(out)
+        return out
+
+class Cifar100VGG11(nn.Module): #  CUDA out of memory
+    def __init__(self, in_features=3, num_classes=100, dim=1600): #in_features-> RGB = 3
+        super().__init__()
+        self.conv1 = nn.Sequential(
+            nn.Conv2d(in_features,
+                        64,
+                        kernel_size=3,
+                        padding=1,
+                        stride=1,
+                        bias=True),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size = 2, stride = 2),
+            
+            nn.Conv2d(64,
+                        128,
+                        kernel_size=3,
+                        padding=1,
+                        stride=1,
+                        bias=True),
+            nn.BatchNorm2d(128),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size = 2, stride = 2),
+            
+            
+            nn.Conv2d(128,
+                        256,
+                        kernel_size=3,
+                        padding=1,
+                        stride=1,
+                        bias=True),
+            nn.BatchNorm2d(256),
+            nn.ReLU(),
+            
+            nn.Conv2d(256,
+                        256,
+                        kernel_size=3,
+                        padding=1,
+                        stride=1,
+                        bias=True),
+            nn.BatchNorm2d(256),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size = 2, stride = 2),
+            
+            nn.Conv2d(256,
+                        512,
+                        kernel_size=3,
+                        padding=1,
+                        stride=1,
+                        bias=True),
+            nn.BatchNorm2d(512),
+            nn.ReLU(),
+            
+            nn.Conv2d(512,
+                        512,
+                        kernel_size=3,
+                        padding=1,
+                        stride=1,
+                        bias=True),
+            nn.BatchNorm2d(512),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size = 2, stride = 2),
+            
+            nn.Conv2d(512,
+                        512,
+                        kernel_size=3,
+                        padding=1,
+                        stride=1,
+                        bias=True),
+            nn.BatchNorm2d(512),
+            nn.ReLU(),
+            
+            nn.Conv2d(512,
+                        512,
+                        kernel_size=3,
+                        padding=1,
+                        stride=1,
+                        bias=True),
+            nn.BatchNorm2d(512),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size = 2, stride = 2),    
+
+        )
+        
+        self.fc1 = nn.Sequential(
+            nn.Dropout(0.5),
+            nn.Linear(7*7*512
+                      , 4096), 
+            nn.ReLU(inplace=True),  
+        )
+        self.fc2 = nn.Sequential(
+            nn.Dropout(0.5),
+            nn.Linear(4096
+                      , 4096), 
+            nn.ReLU(),  
+        )
+
+        self.fc = nn.Linear(256, num_classes)
+
+    def forward(self, x):
+        out = self.conv1(x)
+        out = torch.flatten(out, 1)
+        out = self.fc1(out)
+        out = self.fc2(out)
         out = self.fc(out)
         return out
 
