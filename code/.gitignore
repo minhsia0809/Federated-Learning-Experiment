@@ -5,3 +5,4 @@
 /system/mlruns/*
 /system/models/Cifar100_*_*_*
 /results/*.png
+/system/models/*
