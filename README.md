@@ -8,10 +8,11 @@ generate_file: 根據要產生的資料集的檔案
 - generate_fnist.py -> 產生 FASHION-MNIST
 - generate_cifar10.py -> 產生 CIFAR10
 - generate_cifar100.py -> 產生 CIFAR100
+- generate_svhn.py -> 產生 SVHN
 
 generate_file 參數修改:
 - 如要修改 client 數，需要修改 generate_file 內的 num_clients
-- 如要修改切割好的資料集檔案名稱，需要修改 generate_file 內的 dir_path
+- 如要修改切割好的路徑及資料集檔案名稱，需要修改 generate_file 內的 dir_path
 - 如要修改非獨立同分布的 alpha 值，需修改 utils/dataset_utils.py 內的 alpha
 
 niid: 
@@ -69,7 +70,9 @@ python main.py -data Cifar10_alpha01_100 -nc 100 -jr 0.5 -algo FedUCBN -sca UCB 
 \-lbs 本地 batch size
 
 ### 3.模型
-目前使用 code/system/flcore/trainmodel/models.py 的 FedAvgCNN 類別
+MNIST、FASHION-MNIST、CIFAR10 和 SVHN 使用 code/system/flcore/trainmodel/models.py 的 FedAvgCNN 模型
+Cifar100 使用 code/system/flcore/trainmodel/models.py 的 Cifar100CNN2 模型
+補充：VGC11 太複雜，在 client = 100 時會把 memory 佔光
 
 ### 4.客戶端選擇策略
 在 code/system/flcore/servers/client_selection/ 內新增修改
@@ -85,7 +88,7 @@ python main.py -data Cifar10_alpha01_100 -nc 100 -jr 0.5 -algo FedUCBN -sca UCB 
 把標籤 1 換成 9
 
 code/system/flcore/servers/serverbase.py
-在function select_poisoned_client 中，選取哪個 client 是會被汙染的
+在 function select_poisoned_client 中，選取哪個 client 是會被汙染的
 
 code/system/flcore/clients/clientbase.py
 在 function load_train_data 中，將惡意 client 的資料的 1 label 換成 9
