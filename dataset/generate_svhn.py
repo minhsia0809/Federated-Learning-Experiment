@@ -10,9 +10,9 @@ from utils.dataset_utils import check, separate_data, split_data, save_file
 
 random.seed(1)
 np.random.seed(1)
-num_clients = 100
+num_clients = 500
 num_classes = 10
-dir_path = "svhn_alpha01_100/"
+dir_path = "svhn_alpha05_500/"
 
 
 # Allocate data to users
@@ -33,9 +33,9 @@ def generate_svhn(dir_path, num_clients, num_classes, niid, balance, partition):
         [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
     trainset = torchvision.datasets.SVHN(
-        root=dir_path+"rawdata", train=True, download=True, transform=transform)
+        root=dir_path+"rawdata", split='train', download=True, transform=transform)
     testset = torchvision.datasets.SVHN(
-        root=dir_path+"rawdata", train=False, download=True, transform=transform)
+        root=dir_path+"rawdata", split='test', download=True, transform=transform)
     trainloader = torch.utils.data.DataLoader(
         trainset, batch_size=len(trainset.data), shuffle=False)
     testloader = torch.utils.data.DataLoader(
