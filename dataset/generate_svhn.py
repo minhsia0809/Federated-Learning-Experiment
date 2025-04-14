@@ -28,7 +28,6 @@ def generate_svhn(dir_path, num_clients, num_classes, niid, balance, partition):
     if check(config_path, train_path, test_path, num_clients, num_classes, niid, balance, partition):
         return
         
-    # Get Cifar10 data
     transform = transforms.Compose(
         [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
