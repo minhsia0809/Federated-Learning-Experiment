@@ -6,3 +6,4 @@
 /system/models/Cifar100_*_*_*
 /results/*.png
 /system/models/*
+/system/flcore/trainmodel/_pycache_/
