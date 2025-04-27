@@ -233,6 +233,7 @@ class FedAvg(Server):
                 
                 rewards = clients_acc
                 select_agent.update(selected_ids, rewards)
+                
                 # <- mhsia
                 
                 ## => mhsia code

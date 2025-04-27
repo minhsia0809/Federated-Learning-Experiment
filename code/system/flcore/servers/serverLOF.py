@@ -137,6 +137,7 @@ class FedLOF(Server):
                 model_vectors = [] # => LOF
                 
                 # -> mhsia
+                '''
                 clients_acc = []
                 for client_model, client in zip(self.uploaded_models, self.selected_clients):
                     test_acc, test_num, auc= self.test_metrics_all(client_model, testloaderfull)
@@ -157,10 +158,11 @@ class FedLOF(Server):
                 
                 rewards = clients_acc
                 select_agent.update(selected_ids, rewards)
+                '''
                 # <- mhsia
                 
                 ## => mhsia code
-                '''
+                
                 clients_loss = []
                 for client_model, client in zip(self.uploaded_models, self.selected_clients):
                     test_loss, test_num, auc = self.test_metrics_all(client_model, testloaderfull)
@@ -181,12 +183,12 @@ class FedLOF(Server):
                 
                 rewards = clients_loss
                 select_agent.update(selected_ids, rewards)
-                '''
+                
                 ## <= mhsia code
 
                 same_weight = [1/self.num_join_clients] * self.num_join_clients
-                weight = clients_acc_weight # <- mhsia
-                ## weight = clients_loss_weight ## mhsia code
+                ## weight = clients_acc_weight # <- mhsia
+                weight = clients_loss_weight ## mhsia code
                 
                 # <= mh code 
                 
