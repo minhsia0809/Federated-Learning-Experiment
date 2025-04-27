@@ -155,14 +155,84 @@ class Server(object):
         # self.model.to(self.device)
         client_model.eval()
 
-        test_acc = 0
+        ## test_acc = 0
         ## test_loss = 0.0 ## mhsia
         test_num = 0
         y_prob = []
         y_true = []
+        y_pred = []
         
         ## criterion = torch.nn.CrossEntropyLoss() ## mhsia
         
+        with torch.no_grad():
+            for x, y in testloaderfull:
+                if type(x) == type([]):
+                    x[0] = x[0].to(self.device)
+                else:
+                    x = x.to(self.device)
+                y = y.to(self.device)
+                output = client_model(x)
+                
+                ## loss = criterion(output, y) ## mhsia
+                ## test_loss += loss.item() * y.size(0) ## mhsia
+
+                ## test_acc += (torch.sum(torch.argmax(output, dim=1) == y)).item() ##
+                test_num += y.shape[0]
+
+                y_prob.append(output.detach().cpu().numpy())
+                nc = self.num_classes
+                if self.num_classes == 2:
+                    nc += 1
+                lb = label_binarize(y.detach().cpu().numpy(), classes=np.arange(nc))
+                if self.num_classes == 2:
+                    lb = lb[:, :2]
+                y_true.append(lb)
+                
+                y_pred.append(torch.argmax(output, dim=1).detach().cpu().numpy()) ## mhsia (predict labels)
+
+        # self.model.cpu()
+        # self.save_model(self.model, 'model')
+
+        y_prob = np.concatenate(y_prob, axis=0)
+        y_true = np.concatenate(y_true, axis=0)
+        ## y_true_labels = np.argmax(y_true, axis=1) ## mhsia
+        y_pred = np.concatenate(y_pred, axis=0)
+
+        auc = metrics.roc_auc_score(y_true, y_prob, average='micro')
+        
+        ## mhsia ->
+        
+        loss = metrics.log_loss(y_true, y_prob) ## mhsia
+        '''
+        recall = metrics.recall_score(y_true_labels, y_pred, average='weighted')
+        precision = metrics.precision_score(y_true_labels, y_pred, average='weighted')
+        f1score = metrics.f1_score(y_true_labels, y_pred, average='weighted')
+        accuracy = metrics.accuracy_score(y_true_labels, y_pred)
+        '''
+        ## test_loss = test_loss / test_num ## mhsia
+        
+        ## return test_acc, test_num, auc
+        return loss, test_num, auc ## mhsia
+        ## return test_loss, test_num, auc ## mhsia
+        ## rewards = loss + recall + precision + f1score
+        
+        ## return rewards, test_num, auc ## mhsia
+    
+    def sigmoid(x):
+        sig = 1 / (1 + np.exp(-x))
+        return sig
+    
+    def test_metrics_all2(self, client_model, testloaderfull): #metrix_dict
+        
+        client_model.eval()
+
+        test_acc = 0
+        test_num = 0
+        y_prob = []
+        y_true = []
+        y_true_notonehot = []
+        y_pred = []
+
         with torch.no_grad():
             for x, y in testloaderfull:
                 if type(x) == type([]):
@@ -186,18 +256,107 @@ class Server(object):
                 if self.num_classes == 2:
                     lb = lb[:, :2]
                 y_true.append(lb)
+                
+                y_pred.append(torch.argmax(output, dim=1).detach().cpu().numpy()) ## mhsia (predict labels)
 
         # self.model.cpu()
         # self.save_model(self.model, 'model')
 
         y_prob = np.concatenate(y_prob, axis=0)
         y_true = np.concatenate(y_true, axis=0)
+        y_true_labels = np.argmax(y_true, axis=1) ## mhsia
+        y_pred = np.concatenate(y_pred, axis=0)
 
         auc = metrics.roc_auc_score(y_true, y_prob, average='micro')
+        
+        ## mhsia ->
+        loss = metrics.log_loss(y_true, y_prob) ## mhsia
+        recall = metrics.recall_score(y_true_labels, y_pred, average='weighted')
+        precision = metrics.precision_score(y_true_labels, y_pred, average='weighted')
+        f1score = metrics.f1_score(y_true_labels, y_pred, average='weighted')
+        accuracy = metrics.accuracy_score(y_true_labels, y_pred)
+        
+        ## new
+        '''
+        z_loss = ((loss - np.mean(metrix_dict['loss']))/np.std(metrix_dict['loss']))
+        # z_recall = ((recall - np.mean(metrix_dict['recall']))/np.std(metrix_dict['recall']))
+        # z_precision = ((precision - np.mean(metrix_dict['precision']))/np.std(metrix_dict['precision']))
+        z_f1score = ((f1score - np.mean(metrix_dict['f1score']))/np.std(metrix_dict['f1score']))
+        z_accuracy = ((accuracy - np.mean(metrix_dict['accuracy']))/np.std(metrix_dict['accuracy']))
+        
+        total_z = abs(z_loss) + abs(z_f1score) + abs(z_accuracy) # abs(z_recall) + abs(z_precision) + abs(z_f1score) + abs(z_accuracy)
+        
+        loss_norm = (loss - min(metrix_dict['loss']))/(max(metrix_dict['loss']) - min(metrix_dict['loss']))
+        recall_norm = (recall - min(metrix_dict['recall']))/(max(metrix_dict['recall']) - min(metrix_dict['recall']))
+        precision_norm = (precision - min(metrix_dict['precision']))/(max(metrix_dict['precision']) - min(metrix_dict['precision']))
+        f1score_norm = (f1score - min(metrix_dict['f1score']))/(max(metrix_dict['f1score']) - min(metrix_dict['f1score']))
+        accuracy_norm = (accuracy - min(metrix_dict['accuracy']))/(max(metrix_dict['accuracy']) - min(metrix_dict['accuracy']))
+        
+        rewards = (-loss_norm*(abs(z_loss)/total_z)) + (recall_norm*(abs(z_recall)/total_z)) + (precision_norm*(abs(z_precision)/total_z)) + (f1score_norm*(abs(z_f1score)/total_z)) + (accuracy_norm*(abs(z_accuracy)/total_z))
+        rewards = 1 / (1 + np.exp(-rewards)) #sigmoid
+        '''
         ## test_loss = test_loss / test_num ## mhsia
         
-        return test_acc, test_num, auc
+        ## return test_acc, test_num, auc
         ## return test_loss, test_num, auc ## mhsia
+        
+        rewards = accuracy + f1score
+        
+        ## rewards = (-loss_norm*(abs(z_loss)/total_z)) + (recall_norm*(abs(z_recall)/total_z)) + (precision_norm*(abs(z_precision)/total_z)) + (f1score_norm*(abs(z_f1score)/total_z)) + (accuracy_norm*(abs(z_accuracy)/total_z))
+        ## rewards = loss*(abs(z_loss)/total_z) + recall*(abs(z_recall)/total_z) + precision*(abs(z_precision)/total_z) + f1score*(abs(z_f1score)/total_z) + accuracy*(abs(z_accuracy)/total_z)
+        ## return loss, test_num, auc ## mhsia
+        return rewards, test_num, auc ## mhsia
+    
+    
+    
+    def test_evaluation_metrics_all(self, client_model, testloaderfull): #mhsia
+        client_model.eval()
+
+        test_acc = 0
+        ## test_loss = 0.0 ## mhsia
+        test_num = 0
+        y_prob = []
+        y_true = []
+        y_true_notonehot = []
+        y_pred = []
+        
+        with torch.no_grad():
+            for x, y in testloaderfull:
+                if type(x) == type([]):
+                    x[0] = x[0].to(self.device)
+                else:
+                    x = x.to(self.device)
+                y = y.to(self.device)
+                output = client_model(x)
+
+                test_acc += (torch.sum(torch.argmax(output, dim=1) == y)).item() ##
+                test_num += y.shape[0]
+
+                y_prob.append(output.detach().cpu().numpy())
+                nc = self.num_classes
+                if self.num_classes == 2:
+                    nc += 1
+                lb = label_binarize(y.detach().cpu().numpy(), classes=np.arange(nc))
+                if self.num_classes == 2:
+                    lb = lb[:, :2]
+                y_true.append(lb)
+
+                y_pred.append(torch.argmax(output, dim=1).detach().cpu().numpy()) ## mhsia (predict labels)
+
+        y_prob = np.concatenate(y_prob, axis=0)
+        y_true = np.concatenate(y_true, axis=0)
+        y_true_labels = np.argmax(y_true, axis=1) ## mhsia
+        y_pred = np.concatenate(y_pred, axis=0)
+
+        ## mhsia ->
+        loss = metrics.log_loss(y_true, y_prob) ## mhsia
+        recall = metrics.recall_score(y_true_labels, y_pred, average='macro') #weighted
+        precision = metrics.precision_score(y_true_labels, y_pred, average='macro')
+        f1score = metrics.f1_score(y_true_labels, y_pred, average='macro')
+        accuracy = metrics.accuracy_score(y_true_labels, y_pred)
+        ## test_loss = test_loss / test_num ## mhsia
+
+        return loss, recall, precision, f1score, accuracy ## mhsia
     
     def params_to_vector(self, model):
         params = []
