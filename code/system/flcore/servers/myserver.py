@@ -83,11 +83,14 @@ class FedUCBN(Server):
 
             for i in range(self.global_rounds+1):
                 s_t = time.time()
-                
-                ## => mhsia
+                ## mhsia dynamic poisoning
+                if i == 100:
+                    self.poisoned_ratio = 0.399
+                    self.poisoned_clients = self.select_poisoned_client()
+                    # self.poisoned_clients = []
+                    print(f"poisoned clients: {self.poisoned_clients}")
+                ## => mhsia                
                 '''
-                if i == 60:
-                    self.join_ratio = 0.3
                     self.num_join_clients = int(self.num_clients * self.join_ratio)
                     print(f"\nJoin ratio / total clients: {self.join_ratio} / {self.num_clients}")
                     
@@ -96,13 +99,21 @@ class FedUCBN(Server):
 
                     elif self.select_clients_algorithm == "UCB":
                         select_agent = UCB(self.num_clients, self.num_join_clients)
-                    print(f"select_agent:{select_agent}")
+                        (f"select_agent:{select_agent}")
                     
+                    elif self.select_clients_algorithm == "UCB_cs":
+                        all_client_data = sum(c.train_samples for c in self.clients)
+                        clients_data_ratio = [c.train_samples / all_client_data for c in self.clients]
+                        print('clients_data_ratio:', clients_data_ratio)
+                        select_agent = UCB_cs(self.num_clients, self.num_join_clients, self.global_rounds, clients_data_ratio)
+                    
+                    self.set_clients(args, clientAVG)
                 '''
+                
                 ## <= mhsia
 
                 selected_ids = select_agent.select_clients(i)
-                print("selected clients:", selected_ids)
+                print("selected clients:", sorted(selected_ids))
                 # print("selected_ids type:", type(selected_ids)) # mhsia
                 self.selected_clients = [self.clients[c] for c in selected_ids]
                 self.select_clients_his.append(sorted(selected_ids)) ## mhsia
@@ -126,11 +137,29 @@ class FedUCBN(Server):
 
                 self.receive_models()
                 
-                ''' ## mh code 
+                ## mhsia =>
+                '''
+                metrix_dict = {
+                    'loss':[], 
+                    'recall':[], 
+                    'precision':[], 
+                    'f1score':[], 
+                    'accuracy':[] 
+                }
 
-                # => mh code 
+                for client_model, client in zip(self.uploaded_models, self.selected_clients):
+                    test_loss, test_recall, test_precision, test_f1score, test_accuracy = self.test_evaluation_metrics_all(client_model, testloaderfull)
+                    metrix_dict['loss'].append(test_loss)
+                    metrix_dict['recall'].append(test_recall)
+                    metrix_dict['precision'].append(test_precision)
+                    metrix_dict['f1score'].append(test_f1score)
+                    metrix_dict['accuracy'].append(test_accuracy)
                 '''
                 
+                ## <= mhsia 
+                
+                ## mh code 
+                # => mh code 
                 ##calculate each model's accuracy
                 
                 clients_acc = []
@@ -157,6 +186,7 @@ class FedUCBN(Server):
                 clients_loss = []
                 for client_model, client in zip(self.uploaded_models, self.selected_clients):
                     test_loss, test_num, auc = self.test_metrics_all(client_model, testloaderfull)
+                    ## test_loss, test_num, auc = self.test_metrics_all2(client_model, testloaderfull)
                     #print(test_loss/test_num)
                     clients_loss.append(test_loss/test_num)
                     
@@ -165,7 +195,7 @@ class FedUCBN(Server):
                 reward_decay = 1
                 for reward, client in zip(clients_loss, self.selected_clients):
                     self.sums_of_reward[client.id] =  self.sums_of_reward[client.id] * reward_decay + reward
-                    self.numbers_of_selections[client.id] += 1
+                    self.numbers_of_selections[client.id] += 1        
                 
                 rewards = clients_loss
                 select_agent.update(selected_ids, rewards)
