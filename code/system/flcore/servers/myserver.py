@@ -83,12 +83,59 @@ class FedUCBN(Server):
 
             for i in range(self.global_rounds+1):
                 s_t = time.time()
-                ## mhsia dynamic poisoning
+                ## mhsia: dynamic poisoning =>
+                '''
                 if i == 100:
                     self.poisoned_ratio = 0.399
                     self.poisoned_clients = self.select_poisoned_client()
+                    for index, clientObj in enumerate(self.clients):
+                        if index in self.poisoned_clients:
+                            clientObj.poisoned = True
+                            print(f"poisoned client {index} is selected")
+                        else:
+                            clientObj.poisoned = False
+
                     # self.poisoned_clients = []
+                if i >= 100:
                     print(f"poisoned clients: {self.poisoned_clients}")
+                '''
+                if i in [100, 200, 300, 400, 500, 600, 700]:
+                    for index, clientObj in enumerate(self.clients):
+                        clientObj.poisoned = False
+                        
+                    if i == 100 or i == 700:
+                        self.poisoned_ratio = 0.1
+                    elif i == 200 or i == 600:
+                        self.poisoned_ratio = 0.2
+                    elif i == 300 or i == 500:
+                        self.poisoned_ratio = 0.3
+                    elif i == 400:
+                        self.poisoned_ratio = 0.399
+                    self.poisoned_clients = self.select_poisoned_client()
+                    print(f"poisoned clients: {self.poisoned_clients}")
+                    for index, clientObj in enumerate(self.clients):
+                        if index in self.poisoned_clients:
+                            clientObj.poisoned = True
+                            ## print(f"poisoned client {index} is selected")
+                        else:
+                            clientObj.poisoned = False
+                
+                if i == 800:
+                    self.poisoned_ratio = 0.0
+                    for index, clientObj in enumerate(self.clients):
+                        if index in self.poisoned_clients:
+                            clientObj.poisoned = False
+                            print(f"poisoned client {index} is removed")
+                        else:
+                            clientObj.poisoned = False
+                
+                
+                
+                ## <= mhsia: dynamic poisoning
+                
+                
+                
+                
                 ## => mhsia                
                 '''
                     self.num_join_clients = int(self.num_clients * self.join_ratio)
